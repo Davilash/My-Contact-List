@@ -8,6 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.contentprovider.model.ContactModel
+import com.example.contentprovider.recyclerView.ContactRecyclerAdapter
+import com.example.contentprovider.recyclerView.VerticalSpaceItemDecoration
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -16,39 +19,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        permissions()
+        checkForPermissions()
 
         getAllContacts()
     }
 
-
-
-    /*private fun addContacts() {
-        val contactModel = ContactModel("", "")
-
-        val contentResolver = contentResolver
-        val cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, mOrderBy)
-
-        if (cursor != null && cursor.count > 0) {
-            while (cursor.moveToNext()) {
-                val num = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
-                contactModel.contactName = num
-                contacts.add(contactModel)
-            }
-        } else {
-            contactModel.contactName = "No Contacts in device"
-            contacts.clear()
-            contacts.add(contactModel)
-        }
-
-        cursor.close()
-
-    }*/
-
-    private fun permissions() {
+    private fun checkForPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED)
-            ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)
-        else  ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_CONTACTS), 0)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_CONTACTS), 0)
+        else  ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)
     }
 
 
@@ -64,7 +43,9 @@ class MainActivity : AppCompatActivity() {
             null,
             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC"
         )
-        if (cursor!!.count > 0) {
+            ?: return
+
+        if (cursor.count > 0) {
             while (cursor.moveToNext()) {
 
                 val hasPhoneNumber =
@@ -74,7 +55,8 @@ class MainActivity : AppCompatActivity() {
                     val name =
                         cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
 
-                    contactVO = ContactModel("", "")
+                    contactVO =
+                        ContactModel("", "")
                     contactVO.contactName = name
 
                     val phoneCursor = contentResolver.query(
@@ -92,8 +74,13 @@ class MainActivity : AppCompatActivity() {
                     contactVOList.add(contactVO)
                 }
             }
+            cursor.close()
 
-            val contactAdapter = ContactRecyclerAdapter(applicationContext, contactVOList)
+            val contactAdapter =
+                ContactRecyclerAdapter(
+                    applicationContext,
+                    contactVOList
+                )
             recycler_view_con.layoutManager = LinearLayoutManager(this)
             val dividerItemDecoration = VerticalSpaceItemDecoration(20)
             recycler_view_con.addItemDecoration(dividerItemDecoration)

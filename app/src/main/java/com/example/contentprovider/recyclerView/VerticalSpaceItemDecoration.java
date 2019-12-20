@@ -1,4 +1,4 @@
-package com.example.contentprovider;
+package com.example.contentprovider.recyclerView;
 
 import android.graphics.Rect;
 import android.view.View;
